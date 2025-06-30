@@ -1,0 +1,36 @@
+# Fichier de dépendances pour l'environnement de DÉVELOPPEMENT LOCAL.
+# Il inclut les bibliothèques pour la GUI, le traitement local ET le client RunPod.
+
+# --- Interface Utilisateur (GUI) ---
+PyQt6
+pyvistaqt
+
+# --- Core & 3D (pour le traitement local) ---
+opencv-python
+numpy
+Pillow
+trimesh
+open3d
+
+# --- Client pour le traitement distant ---
+runpod
+requests
+
+# --- Moteurs IA & Dépendances (pour le traitement local) ---
+huggingface-hub
+transformers
+kornia
+timm
+
+# --- Dépendances spécifiques aux modèles (pour le traitement local) ---
+einops
+omegaconf
+pytorch-lightning
+torchdiffeq
+diffusers
+accelerate
+
+# --- Installation directe depuis Git ---
+# Moins fiable que le clonage manuel, mais possible
+# git+https://github.com/microsoft/MoGe.git
+# git+https://github.com/facebookresearch/vggt.git

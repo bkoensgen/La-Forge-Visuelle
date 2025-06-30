@@ -1,0 +1,33 @@
+# --- Core & 3D ---
+# Pas de GUI ici !
+opencv-python
+numpy
+Pillow
+trimesh
+open3d
+
+# --- Moteurs IA & Dépendances ---
+torch
+torchvision
+huggingface-hub
+transformers
+kornia
+timm
+
+# --- Dépendances pour DepthFM ---
+einops
+omegaconf
+pytorch-lightning
+torchdiffeq
+diffusers
+accelerate
+
+# --- Dépendances pour VGGT (si utilisées) ---
+# git+https://github.com/facebookresearch/vggt.git
+
+# --- Dépendances pour MoGe (si utilisées) ---
+# git+https://github.com/microsoft/MoGe.git
+
+# --- Dépendances pour RunPod ---
+runpod
+requests
