@@ -18,30 +18,6 @@
 *   **Options de Pré-traitement** : Améliorez la qualité de la reconstruction avec des outils intégrés comme la suppression automatique de l'arrière-plan.
 *   **Installation Simplifiée** : Un script unique (`install_helper.py`) gère le téléchargement des dépendances, des modèles et des dépôts externes.
 
-## 🏛️ Architecture
-
-Le projet est conçu autour d'une architecture flexible qui permet de séparer l'interface utilisateur du moteur de calcul.
-
-    +---------------------------+
-    |      Application GUI      |
-    |      (main_window.py)     |
-    +-------------+-------------+
-                  |
-    +-------------v-------------+      +---------------------------+
-    |    Choix du Processeur    |----->|      src/config.py        |
-    |  (Basé sur le config)     |      |  (PROCESSING_MODE)        |
-    +-------------+-------------+      +---------------------------+
-                  |
-      +---------------------------+    +---------------------------+
-      | Si "local"                |    | Si "remote"               |
-      v                           v    v                           v
-    +---------------------------+    +---------------------------+
-    |     LocalProcessor        |    |     RemoteProcessor       |
-    | (utilise le GPU local)    |    | (appelle l'API RunPod)    |
-    +---------------------------+    +---------------------------+
-
-Cette approche permet de tester et développer rapidement en local, tout en ayant la capacité de passer à une puissance de calcul quasi illimitée dans le cloud en changeant une seule ligne de configuration.
-
 ## 🚀 Démarrage Rapide
 
 Suivez ces étapes pour installer et lancer l'application sur votre machine.
