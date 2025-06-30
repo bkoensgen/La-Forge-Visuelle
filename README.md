@@ -1,4 +1,4 @@
-# La-Forge-Visuelle
+# La Forge Visuelle
 
 > Un visualiseur et outil de reconstruction 3D qui transforme n'importe quelle image 2D en un modèle 3D détaillé, en utilisant la puissance de multiples moteurs d'IA et une architecture flexible locale ou cloud.
 
