@@ -1,0 +1,33 @@
+# Dossiers d'environnement virtuel Python
+venv/
+.venv/
+env/
+
+# Cache Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Dépôt Git
+.git/
+.gitignore
+
+# Dossiers de configuration des IDE
+.vscode/
+.idea/
+
+# --- IGNORER LES DOSSIERS LOURDS ---
+# C'est la partie la plus importante pour résoudre le problème de "blocage".
+# Ces dossiers seront créés DANS l'image via les commandes RUN, pas copiés depuis votre machine.
+checkpoints/
+vendor/
+
+# Dossiers de données et de sortie qui ne doivent pas être dans l'image
+images/
+output/
+hdris/
+
+# Fichiers spécifiques au système
+Thumbs.db
+desktop.ini
+.DS_Store
