@@ -1,5 +1,8 @@
 import sys
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def add_vendor_to_path():
     """Ajoute les dépôts clonés au chemin d'importation de Python."""

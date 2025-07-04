@@ -1,6 +1,6 @@
 # Étape 1: Image "Builder" pour pré-compiler les dépendances
 # On utilise une image "devel" qui contient les outils de compilation nécessaires.
-FROM nvidia/cuda:12.1.1-devel-ubuntu22.04 as builder
+FROM nvidia/cuda:12.1.1-devel-ubuntu22.04 AS builder
 
 # Installer Python et pip
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -40,8 +40,7 @@ WORKDIR /app
 COPY --from=builder /app/wheels /wheels
 RUN pip install --no-cache-dir /wheels/*
 
-# --- CORRECTION MAJEURE : TÉLÉCHARGEMENT DES CHECKPOINTS ---
-# Au lieu de COPIER les gros fichiers, on les télécharge directement dans l'image.
+# --- TÉLÉCHARGEMENT DES CHECKPOINTS ---
 # Cette couche sera mise en cache, donc le téléchargement ne se fera qu'une seule fois.
 RUN mkdir -p /app/checkpoints
 RUN echo "Téléchargement des checkpoints..."
@@ -50,7 +49,7 @@ RUN curl -L -o /app/checkpoints/depth_anything_v2_vits.pth "https://huggingface.
 RUN curl -L -o /app/checkpoints/depth_anything_v2_vitb.pth "https://huggingface.co/depth-anything/Depth-Anything-V2-Base/resolve/main/depth_anything_v2_vitb.pth"
 RUN curl -L -o /app/checkpoints/depth_anything_v2_vitl.pth "https://huggingface.co/depth-anything/Depth-Anything-V2-Large/resolve/main/depth_anything_v2_vitl.pth"
 
-# --- CORRECTION MAJEURE : TÉLÉCHARGEMENT DES DÉPÔTS VENDOR ---
+# --- TÉLÉCHARGEMENT DES DÉPÔTS VENDOR ---
 # On clone les dépôts au lieu de les copier. C'est plus propre et évite d'inclure l'historique .git lourd.
 # L'option --depth 1 est une optimisation qui ne télécharge que la dernière version, rendant le clone plus rapide.
 RUN mkdir -p /app/vendor
@@ -58,15 +57,12 @@ RUN echo "Clonage des dépôts vendor..."
 RUN git clone --depth 1 https://github.com/CompVis/depth-fm.git /app/vendor/depthfm_repo
 RUN git clone --depth 1 https://huggingface.co/spaces/depth-anything/Depth-Anything-V2 /app/vendor/depth_anything_v2_repo
 
-# --- Copie du code source de votre application ---
-# On ne copie que les fichiers strictement nécessaires au fonctionnement du worker.
-COPY src/config.py ./src/
-COPY src/engines/ ./src/engines/
-COPY src/geometry_builder.py ./src/
-COPY src/__init__.py ./src/
-COPY src/engines/__init__.py ./src/engines/
+# --- CORRECTION FINALE : COPIE DU CODE SOURCE ---
+# Au lieu de copier les fichiers de src un par un, on copie tout le dossier.
+# C'est plus simple et ça garantit que tous les fichiers nécessaires sont présents.
+COPY src/ ./src/
 
-# Copier le script handler qui est le point d'entrée pour RunPod
+# Copier le script handler
 COPY remote_worker/handler.py .
 
 # Commande par défaut pour exécuter le worker RunPod.

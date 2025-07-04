@@ -7,7 +7,9 @@ from PIL import Image
 import numpy as np
 import io
 import runpod
+import traceback
 
+# --- Initialisation (ne change pas) ---
 project_root = os.path.dirname(os.path.abspath(__file__))
 depthfm_repo_path = os.path.join(project_root, 'vendor', 'depthfm_repo')
 da_repo_path = os.path.join(project_root, 'vendor', 'depth_anything_v2_repo')
@@ -25,17 +27,31 @@ controller = AppController()
 builder = GeometryBuilder()
 preprocessor = RMBGPreprocessor(app_config.DEVICE)
 print("--- Worker prêt à recevoir des tâches ---")
+# ---------------------------------------------
+
 
 def handler(job):
     try:
-        job_input = job['input']
-        image_b64 = job_input['image_b64']
-        engine_name = job_input['engine_name']
-        options = job_input['options']
+        job_input = job.get('input', {}) # Utilise .get() pour la sécurité
+
+        # --- VÉRIFICATION DE L'ENTRÉE ---
+        # Si c'est une requête de test ou une entrée invalide, on s'arrête poliment.
+        image_b64 = job_input.get('image_b64')
+        engine_name = job_input.get('engine_name')
+
+        if not all([image_b64, engine_name]):
+            error_msg = "Entrée invalide. Les clés 'image_b64' et 'engine_name' sont requises."
+            print(error_msg)
+            # On retourne une erreur propre au lieu de crasher.
+            # RunPod verra ça comme une tâche terminée (avec erreur), pas comme un worker planté.
+            return {"error": error_msg}
+        # ------------------------------------
+
+        options = job_input.get('options', {}) # .get() pour les options aussi
         image_bytes = base64.b64decode(image_b64)
         img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
         
-        # --- Traitement ---
+        # --- Traitement (ne change pas) ---
         def resize_and_pad(img_in: Image.Image, target_size: int, divisor: int = 64) -> Image.Image:
             import math
             img_in.thumbnail((target_size, target_size), Image.Resampling.LANCZOS)
@@ -48,15 +64,18 @@ def handler(job):
         resize_target = options.get('resize_to', 'Original')
         if resize_target != 'Original':
             img = resize_and_pad(img, int(resize_target))
+        
         fg_mask = None
         if options.get('bg_removal', False):
             preproc_data = preprocessor.process(img)
             img = preproc_data['image']
             fg_mask = preproc_data['mask']
+        
         engine = controller.get_engine(engine_name)
         engine.load_model_if_needed()
         raw_data = engine.process(img, options)
         mesh = builder.build(raw_data, np.array(img), fg_mask, options)
+        
         if not mesh:
             raise ValueError("La construction de la géométrie a échoué.")
         # --- Fin du traitement ---
@@ -67,13 +86,9 @@ def handler(job):
         
         print(f"Maillage exporté vers {temp_path}. RunPod va l'uploader.")
         
-        # Le client s'attend maintenant à une URL dans la clé 'output'.
-        # En retournant juste le chemin, l'environnement RunPod s'occupe de l'upload
-        # et de la construction de la réponse correcte. Cette partie reste donc la même.
         return temp_path
 
     except Exception as e:
-        import traceback
         error_message = f"Erreur dans le handler: {traceback.format_exc()}"
         print(error_message)
         return {"error": error_message}
